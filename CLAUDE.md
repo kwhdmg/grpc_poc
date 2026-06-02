@@ -24,9 +24,23 @@ make gen      # regenerate Go + Python stubs from the proto (bash scripts/gen.sh
 make tidy     # go mod tidy — resolve Go deps / fill go.sum
 make server   # go run ./server-go  (listens on :50051)
 make client   # python3 client-python/client.py  (server must be running first)
+make test     # pytest suite under client-python/tests (builds+launches the server)
 ```
 
-Run the server and client in two separate terminals. There is no test suite.
+Run the server and client in two separate terminals.
+
+### Tests
+
+`pytest` lives in `client-python/tests/`. `test_fmt.py` unit-tests `client.fmt`
+(pure, no server). `test_rpc.py` is contract/integration coverage of all three RPCs —
+the `grpc_stub` session fixture in `conftest.py` builds the Go server with `go build`,
+launches it on `:50051`, and yields a connected stub. If the Go toolchain is missing
+or the build fails, the RPC tests **skip** (they never fail for environment reasons).
+Run with `make test`, or `cd client-python && uv run pytest`. pytest is a `dev`
+dependency group in `pyproject.toml`; `uv sync` installs it.
+
+Note: `factorize(0)` infinite-loops in the server (stripping factors of 2 never
+terminates for `n == 0`), so no test passes `value=0`.
 
 ### Python environment
 

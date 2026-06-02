@@ -67,6 +67,29 @@ Expected client output (exercises all three RPC patterns):
 
 Stop the server with `Ctrl-C`.
 
+## Running the tests
+
+The pytest suite lives in `client-python/tests/` and is split in two:
+
+- `test_fmt.py` — pure unit tests for the `fmt` rendering helper. No server.
+- `test_rpc.py` — contract tests over all three RPCs. A session fixture builds the
+  Go server (`go build`), launches it on `:50051`, and connects a stub.
+
+```bash
+make test                                  # from the repo root
+# or:
+cd client-python && uv run pytest          # add -v for per-test output
+cd client-python && uv run pytest tests/test_fmt.py   # unit tests only (no Go needed)
+```
+
+`pytest` is a `dev` dependency; `uv sync` installs it. If the Go toolchain isn't on
+`PATH` or the build fails, the `test_rpc.py` tests **skip** rather than fail — run
+`uv run pytest -rs` to see skip reasons. Don't run these while a server is already
+bound to `:50051`; the fixture starts its own and the port would clash.
+
+> Do not feed `value=0` to the server in a test — `factorize(0)` infinite-loops
+> (stripping factors of 2 never terminates), which would hang the run.
+
 ## Changing the contract
 
 Any edit to `proto/factorize.proto` requires regeneration and a rebuild:

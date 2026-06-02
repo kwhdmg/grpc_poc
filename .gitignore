@@ -2,4 +2,5 @@ server-go/server
 bin/
 *.pyc
 __pycache__/
+.pytest_cache/
 go.sum

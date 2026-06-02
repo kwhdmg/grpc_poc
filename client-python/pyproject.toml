@@ -8,3 +8,13 @@ dependencies = [
     "grpcio>=1.81.0",
     "grpcio-tools>=1.81.0",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+]
+
+[tool.pytest.ini_options]
+# Make `import client` and the generated `factorize_pb2` resolvable from tests.
+pythonpath = ["."]
+testpaths = ["tests"]

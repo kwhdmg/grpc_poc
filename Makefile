@@ -1,5 +1,5 @@
 # Convenience targets. Run from the project root.
-.PHONY: gen tidy server client
+.PHONY: gen tidy server client test
 
 gen: ## Regenerate Go + Python stubs from the proto
 	bash scripts/gen.sh
@@ -12,3 +12,6 @@ server: ## Build & run the Go gRPC server (listen on :50051)
 
 client: ## Run the Python client (server must already be running)
 	python3 client-python/client.py
+
+test: ## Run the pytest suite (builds & launches the Go server itself)
+	cd client-python && uv run pytest
