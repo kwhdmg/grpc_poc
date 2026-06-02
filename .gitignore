@@ -1,0 +1,4 @@
+server-go/server
+*.pyc
+__pychach__/
+go.sum

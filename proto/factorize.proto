@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package factorize.v1;
+
+// go_package: <import path>;<package name>
+// Change "example.com/grpc_poc" to your real module path (see README)
+option go_package = "example.com/grpc_poc/gen/go/factorizepb;factorizepb";
+
+// Factorizer demonstrates the three core gRPC interaction patterns.
+// Each maps onto a real ETL ingestion shape:
+//   Factorize      -> single record transform (request/response)
+//   FactorizeBatch -> fan-out: one trigger, many streamed results
+//   FactorizeStream -> continuous pipeline: stream in, stream out
+service Factorizer {
+  // Unary RPC: one request, one response. The gRPC "hello world".
+  rpc Factorize(FactorizeRequest) returns (FactorizeResponse);
+
+  // Server-streaming RPC: client sends one request, server returns a
+  // stream of responses (one per input value, emitted as it is computed).
+  rpc FactorizeBatch(FactorizeBatchRequest) returns (stream FactorizeResponse);
+
+  // Bidirectional streaming RPC: both sides stream independently over a
+  // single long-lived connection. This is the ETL-pipeline pattern.
+  rpc FactorizeStream(stream FactorizeRequest) returns (stream FactorizeResponse);
+}
+
+message FactorizeRequest {
+  uint64 value = 1;
+}
+
+message FactorizeBatchRequest {
+  repeated uint64 values = 1;
+}
+
+// A prime factor and how many times it occurs, e.g. 360 = 2^3 * 3^2 * 5^1.
+message PrimeFactor {
+  uint64 prime = 1;
+  uint32 exponent = 2;
+}
+
+message FactorizeResponse {
+  uint64 value = 1;
+  repeated PrimeFactor factors = 2;
+  // Server-side compute time, useful when you later benchmark the ETL engine.
+  uint64 elapsed_micros = 3;
+}
