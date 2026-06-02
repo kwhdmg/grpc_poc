@@ -1,4 +1,5 @@
 server-go/server
+bin/
 *.pyc
-__pychach__/
+__pycache__/
 go.sum

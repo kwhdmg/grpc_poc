@@ -42,7 +42,9 @@ method *shapes* are the whole point:
 | `FactorizeStream` | bidirectional (many ↔ many) | continuous in/out pipeline          |
 
 `option go_package` controls the Go import path — change `example.com/grpc_poc`
-to your real module path if you publish it.
+to your real module path if you publish it. It **must** share the prefix passed
+to `protoc`'s `--go_opt=module=` (both are `example.com/grpc_poc` here); a
+mismatch makes `protoc-gen-go` skip emitting the Go stubs entirely.
 
 ## Step 2 — Install the toolchain
 
@@ -56,8 +58,9 @@ go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 export PATH="$PATH:$(go env GOPATH)/bin"
 
-# Python tooling
-pip install -r client-python/requirements.txt
+# Python tooling (this project uses uv, not pip)
+#   brew install uv   # or: curl -LsSf https://astral.sh/uv/install.sh | sh
+cd client-python && uv sync && cd ..
 ```
 
 ## Step 3 — Generate the stubs
@@ -70,6 +73,10 @@ This produces `gen/go/factorizepb/*.pb.go` (messages + client/server interfaces)
 and `gen/python/factorize_pb2*.py`. You never hand-write these; regenerate them
 whenever the proto changes. The Go server only has to implement the generated
 `FactorizerServer` interface; the Python client gets a ready-made `FactorizerStub`.
+
+> The Go plugins (`protoc-gen-go`, `protoc-gen-go-grpc`) install into
+> `$(go env GOPATH)/bin`. If `scripts/gen.sh` reports them "not found", add that
+> directory to `PATH` first: `export PATH="$PATH:$(go env GOPATH)/bin"`.
 
 ## Step 4 — Resolve Go dependencies
 
@@ -87,7 +94,7 @@ go run ./server-go         # or: make server
 
 Terminal 2 (client):
 ```bash
-python3 client-python/client.py     # or: make client
+cd client-python && uv run python client.py     # or, from the root: make client
 ```
 
 Expected output:
